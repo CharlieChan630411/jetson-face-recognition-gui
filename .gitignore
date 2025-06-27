@@ -3,6 +3,9 @@ __pycache__/
 *.pyc
 *.pyo
 
+# 忽略所有 dataset 下的 pkl
+**/dataset/*.pkl
+
 # Virtual env
 env/
 venv/
