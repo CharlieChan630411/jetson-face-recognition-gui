@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual env
+env/
+venv/
+
+# Dataset
+*.pkl
+dataset/faces.pkl
+
+# Build
+build/
+dist/
+
+# Jetson cache
+*.log
+*.so
+
+# VSCode or JetBrains IDEs
+.vscode/
+.idea/
+
