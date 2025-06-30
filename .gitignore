@@ -1,28 +1,20 @@
 # Python
 __pycache__/
-*.pyc
-*.pyo
-
-# 忽略所有 dataset 下的 pkl
-**/dataset/*.pkl
-
-# Virtual env
-env/
-venv/
-
-# Dataset
+*.py[cod]
 *.pkl
-dataset/faces.pkl
 
-# Build
-build/
-dist/
+# OpenCV 相片輸出與分類
+good/
+bad/
+sideface/
 
-# Jetson cache
-*.log
-*.so
+# 編譯 / 建置 log
+build_opencv.log
 
-# VSCode or JetBrains IDEs
-.vscode/
-.idea/
+# 編輯器與作業系統暫存
+*.swp
+.DS_Store
+
+# Jetson 相關暫存（可選）
+nvdlis_tmp*
 
