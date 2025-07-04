@@ -5,7 +5,7 @@
 辨識邏輯與畫面由 gui.py 控制。
 """
 
-from src.gui import run_gui
+from jetsoncv.gui import run_gui
 
 if __name__ == "__main__":
     run_gui()  # 一行啟動 GUI

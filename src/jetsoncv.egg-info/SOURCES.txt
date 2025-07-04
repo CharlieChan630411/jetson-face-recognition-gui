@@ -1,0 +1,13 @@
+README.md
+setup.py
+src/jetsoncv/__init__.py
+src/jetsoncv/camera.py
+src/jetsoncv/face_database.py
+src/jetsoncv/face_detector.py
+src/jetsoncv/face_encoder.py
+src/jetsoncv/gui.py
+src/jetsoncv/main.py
+src/jetsoncv.egg-info/PKG-INFO
+src/jetsoncv.egg-info/SOURCES.txt
+src/jetsoncv.egg-info/dependency_links.txt
+src/jetsoncv.egg-info/top_level.txt
