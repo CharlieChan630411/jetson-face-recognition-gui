@@ -1,79 +1,105 @@
+"""
+face_detector.py
+----------------
+以物件導向方式封裝「攝影機開啟 → 臉部偵測 → 顯示結果」流程。
+後續若要切換到 RetinaFace + TensorRT，只要改 init() / detect() 兩處即可。
+"""
+
 import cv2
-
-# === 1. 載入正面與側臉模型 ===
-front_model = '/usr/share/opencv4/haarcascades/haarcascade_frontalface_default.xml' #載入正面模型
-profile_model = '/usr/share/opencv4/haarcascades/haarcascade_profileface.xml' #載入側面模型
-
-# 載入 OpenCV 內建的臉部偵測模型（Haar Cascade）
-face_cascade = cv2.CascadeClassifier(front_model)
-profile_cascade = cv2.CascadeClassifier(profile_model) 
-
-if face_cascade.empty() or profile_cascade.empty():
-    sys.exit("❌ 無法載入模型")
-    
-
-# 開啟攝影機
-cap = cv2.VideoCapture(0)
-if not cap.isOpened():
-    print("無法開啟攝影機")
-    exit()
-
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("無法讀取畫面")
-        break
-
-    # 將畫面轉為灰階（臉部偵測效率更高）
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    # === 3. 偵測正臉 ===
-    # 偵測臉部，返回的 faces 是座標陣列
-    faces = face_cascade.detectMultiScale(
-        gray,              # 灰階影像
-        scaleFactor=1.3,   # 每次縮小影像比例（數字越小越精細）
-        minNeighbors=5,    # 偵測到多少相鄰區塊才算真的臉（越大越嚴格）
-        minSize=(30, 30)   # 最小臉部尺寸
-    )
-
-    # === 4. 偵測側臉（原圖 + 水平鏡像）===
-    profiles = profile_cascade.detectMultiScale(
-        gray,              # 灰階影像
-        scaleFactor=1.3,   # 每次縮小影像比例（數字越小越精細）
-        minNeighbors=5,    # 偵測到多少相鄰區塊才算真的臉（越大越嚴格）
-        minSize=(30, 30)   # 最小臉部尺寸)
-    )
-    flipped_gray = cv2.flip(gray, 1) # 左右翻轉（偵測另一側）
-    flipped_profiles = profile_cascade.detectMultiScale(
-        flipped_gray,              # 灰階影像
-        scaleFactor=1.3,   # 每次縮小影像比例（數字越小越精細）
-        minNeighbors=5,    # 偵測到多少相鄰區塊才算真的臉（越大越嚴格）
-        minSize=(30, 30)   # 最小臉部尺寸)
-    )
+import sys
+from datetime import datetime
 
 
-    # === 5. 畫框（正臉是綠色） ===
-    #OpenCV 是使用BGR 不是RGB
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+class FaceDetector:
+    """臉部偵測主類別"""
 
-    # === 6. 畫框（原圖側臉是藍色） ===
-    for (x, y, w, h) in profiles:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2) 
+    def __init__(self, cam_id: int = 0):
+        """
+        初始化：
+        1. 載入 (暫時) Haar Cascade 模型
+        2. 預留未來 TensorRT engine 的載入位置
+        """
+        # ======== 預留 TensorRT engine 入口 ========
+        engine_path = "models/retinaface.engine"
+        print("🚧 目前使用 OpenCV Haar Cascade；日後將整合 TensorRT")
+        print(f"🧪 預留 engine 路徑：{engine_path}")
+        # =========================================
 
-    # === 7. 畫框（翻轉側臉是紅色） ===  
-    frame_width = frame.shape[1]
-    for (x, y, w, h) in flipped_profiles:
-        x_flip = frame_width - x - w
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)     
+        # 1. 先載入 Haar Cascade
+        front_model = "/usr/share/opencv4/haarcascades/haarcascade_frontalface_default.xml"
+        profile_model = "/usr/share/opencv4/haarcascades/haarcascade_profileface.xml"
 
-    # === 8. 顯示影像 ===
-    cv2.imshow('正臉 + 側臉偵測', frame)
+        self.face_cascade = cv2.CascadeClassifier(front_model)
+        self.profile_cascade = cv2.CascadeClassifier(profile_model)
 
-    # 按下 q 鍵退出
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        if self.face_cascade.empty() or self.profile_cascade.empty():
+            sys.exit("❌ 無法載入 Haar Cascade 模型")
 
-# 清除資源
-cap.release()
-cv2.destroyAllWindows()
+        # 2. 打開攝影機
+        self.cap = cv2.VideoCapture(cam_id)
+        if not self.cap.isOpened():
+            sys.exit("❌ 無法開啟攝影機")
+
+        # 3. 設定視窗名稱
+        self.window = "Jetson Face Detection (Haar Cascade)"
+
+    # --------------------------------------------------
+    def detect(self, frame):
+        """
+        臉部偵測核心函式：
+        1. 轉灰階提高效率
+        2. 同時偵測正臉與側臉
+        3. 回傳所有框框 (list)
+        """
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # 偵測正臉
+        faces = self.face_cascade.detectMultiScale(
+            gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60)
+        )
+
+        # 偵測側臉
+        profiles = self.profile_cascade.detectMultiScale(
+            gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60)
+        )
+
+        # 將兩種結果合併
+        return list(faces) + list(profiles)
+
+    # --------------------------------------------------
+    def run(self):
+        """主迴圈：讀取影像 → 偵測 → 畫框 → 顯示"""
+        while True:
+            ret, frame = self.cap.read()
+            if not ret:
+                print("無法讀取畫面")
+                break
+
+            boxes = self.detect(frame)
+
+            # 畫框
+            for (x, y, w, h) in boxes:
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+            # 在左上角顯示 FPS 時間戳
+            ts = datetime.now().strftime("%H:%M:%S")
+            cv2.putText(frame, f"Time {ts}", (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+
+            cv2.imshow(self.window, frame)
+
+            # 按 q 離開
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        # 收尾
+        self.cap.release()
+        cv2.destroyAllWindows()
+
+
+# --------------------------------------------
+# 當直接執行此檔時，啟動偵測；被 import 時不會跑
+if __name__ == "__main__":
+    detector = FaceDetector()
+    detector.run()
+

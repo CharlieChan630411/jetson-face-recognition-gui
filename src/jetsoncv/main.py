@@ -2,11 +2,15 @@
 # src/main.py
 """
 專案主入口：負責初始化並啟動 GUI。
-辨識邏輯與畫面由 gui.py 控制。
+辨識邏輯與畫面由 main.py 控制。
 """
 
-from jetsoncv.gui import run_gui
+from .face_detector import FaceDetector
+
+def main():
+    detector = FaceDetector() 
+    detector.run()
 
 if __name__ == "__main__":
-    run_gui()  # 一行啟動 GUI
+    main()  # 一行啟動 GUI
 
