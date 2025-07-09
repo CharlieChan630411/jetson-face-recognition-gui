@@ -1,6 +1,6 @@
 import cv2, numpy as np
 from retinaface_trt import RetinaFaceTRT
-from retinaface_post import decode, decode_landm, nms, _PRIORS
+from retinaface_infer.retinaface_post import decode, decode_landm, nms, _PRIORS
 
 engine_path = "retinaface.engine"       # 與 .py 同層
 image_path  = "output_retina.jpg"       # 測試圖

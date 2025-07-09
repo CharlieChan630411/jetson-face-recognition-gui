@@ -23,6 +23,9 @@ import os
 import numpy as np
 import cv2
 import tensorrt as trt
+from .landmark_drawer import draw_landmarks
+
+#image = draw_landmarks(image, valid_landms.tolist())
 
 TRT_LOGGER = trt.Logger(trt.Logger.INFO)
 
