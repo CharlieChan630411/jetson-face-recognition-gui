@@ -1,0 +1,14 @@
+--- src/retinaface_infer/face_detector_retina.py.bak	2025-07-09 13:24:42.206749690 +0800
++++ src/retinaface_infer/face_detector_retina.py	2025-07-09 13:27:22.714511985 +0800
+@@ -16,7 +16,10 @@
+ # 临时目录，保证肯定是空的，程序会自动下载正确版本
+ temp_root = tempfile.mkdtemp()
+ 
+-detector = RetinaFace(name="retinaface_mnet025", root=temp_root)
++def get_detector():
++    from insightface.model_zoo import RetinaFace
++    return RetinaFace(name="retinaface_mnet025_v2", root="~/.insightface")
++
+ detector.prepare(ctx_id=0)   # ctx_id=0 → CPU；若之後用 GPU 改 -1
+ 
+ # 2. 讀取攝影機影像

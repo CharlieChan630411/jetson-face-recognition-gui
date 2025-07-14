@@ -18,3 +18,4 @@ def load_db(pkl_path: Path = DEFAULT_PKL):
     with open(pkl_path, "rb") as f:
         return pickle.load(f)
 
+

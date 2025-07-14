@@ -1,0 +1,9 @@
+--- src/retinaface_infer/retinaface_demo_vis.py.bak	2025-07-09 13:08:26.747969358 +0800
++++ src/retinaface_infer/retinaface_demo_vis.py	2025-07-09 13:16:09.290747549 +0800
+@@ -1,5 +1,5 @@
+ import cv2, numpy as np
+-from retinaface_trt import RetinaFaceTRT
++from retinaface_infer.retinaface_trt import RetinaFaceTRT
+ from retinaface_infer.retinaface_post import decode, decode_landm, nms, _PRIORS
+ 
+ engine_path = "retinaface.engine"       # 與 .py 同層

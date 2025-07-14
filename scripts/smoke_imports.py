@@ -5,17 +5,22 @@ smoke_imports.py – 遞迴 import src 內所有 .py
 """
 import importlib.util, pathlib, traceback, sys, os
 
-# scripts/smoke_imports.py
+# 設定專案根目錄，並確保將 src 加入 sys.path
+ROOT = pathlib.Path(__file__).resolve().parents[1]  # 專案根目錄
+os.chdir(ROOT)  # 設置當前工作目錄為專案根目錄
+sys.path.append(str(ROOT / "src"))  # 添加 src 目錄到 sys.path
+
+print(f"已將 {ROOT / 'src'} 添加到 sys.path")
+
 TARGET_DIRS = ["retinaface_infer", "facedb", "gui_main"]
 
-ROOT = pathlib.Path(__file__).resolve().parents[1] / "src"
 errors = []
 
 for sub in TARGET_DIRS:
-    for py in (ROOT / sub).rglob("*.py"):
+    for py in (ROOT / "src" / sub).rglob("*.py"):
         if py.name == "__init__.py":
             continue
-        module_name = ".".join(py.relative_to(ROOT).with_suffix("").parts)
+        module_name = ".".join(py.relative_to(ROOT / "src").with_suffix("").parts)
 
         # 跳過會開相機的 gui_main.camera
         if module_name == "gui_main.camera":

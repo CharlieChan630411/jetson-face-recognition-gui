@@ -1,0 +1,36 @@
+--- src/retinaface_infer/retinaface_demo_vis.py.bak	2025-07-09 13:43:07.236192181 +0800
++++ src/retinaface_infer/retinaface_demo_vis.py	2025-07-09 13:50:09.409975004 +0800
+@@ -1,12 +1,30 @@
++import argparse
++import os
++import sys
++
+ import cv2, numpy as np
+ from retinaface_infer.retinaface_trt import RetinaFaceTRT
+ from retinaface_infer.retinaface_post import decode, decode_landm, nms, _PRIORS
+ 
+-engine_path = "retinaface.engine"       # 與 .py 同層
+-image_path  = "output_retina.jpg"       # 測試圖
++parser = argparse.ArgumentParser()
++parser.add_argument('--engine', required=True, help='Path to TensorRT engine file')
++parser.add_argument('--image', required=True, help='Path to input image')
++args = parser.parse_args()
++
++engine_path = args.engine
++if not os.path.exists(engine_path):
++    print(f"[❌] 找不到指定 engine：{engine_path}")
++    sys.exit(1)
++
++image_path  = args.image       # 測試圖
+ 
+ model = RetinaFaceTRT(engine_path)
+-img   = cv2.imread(image_path)
++if not os.path.exists(image_path):
++    print(f"[❌] 找不到圖片檔案：{image_path}")
++    sys.exit(1)
++
++img = cv2.imread(image_path)
++
+ boxes_raw, scores_raw, landm_raw = model.infer(img)
+ 
+ boxes  = decode(boxes_raw[0], _PRIORS)

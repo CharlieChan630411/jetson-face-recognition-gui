@@ -9,6 +9,11 @@ import cv2
 import sys
 from datetime import datetime
 
+def get_face_detector():
+    from gui_main.face_detector import FaceDetector
+    return FaceDetector
+
+
 
 class FaceDetector:
     """臉部偵測主類別"""

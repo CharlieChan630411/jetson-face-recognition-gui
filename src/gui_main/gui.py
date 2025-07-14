@@ -17,13 +17,15 @@ src/gui.py  –  Jetson‑FaceRecognizer 即時 GUI（CNN + 效能資訊）
 
 """
 
+
 from pathlib import Path
 import time
 
 import cv2                            # OpenCV 影像處理
 import face_recognition as fr         # face_recognition 函式庫
 
-from jetsoncv.face_database import load_db # 讀取 faces.pkl 自家模組
+from src.facedb import face_database # 讀取 faces.pkl 自家模組
+
 
 # 置於 import 區域
 import subprocess, threading, re
@@ -74,11 +76,11 @@ def run_gui() -> None:
     """由 src/main.py 呼叫的入口點；獨立執行亦可。"""
 
     # 1️⃣ 讀取特徵庫 -----------------------------------------------------
-    db = load_db()
+    db = face_database.load_db()
     encodings = db["encodings"]
     names_db  = db["names"]
     print(f"✅ faces.pkl 載入完成：共 {len(encodings)} 筆特徵，人物 {set(names_db)}")
-    threading.Thread(target=_update_gpu_util, daemon=True).start()
+    #threading.Thread(target=_update_gpu_util, daemon=True).start()
 
 
     # 2️⃣ 開啟攝影機 -----------------------------------------------------
@@ -102,7 +104,8 @@ def run_gui() -> None:
         inference_ms = 0.0
         if frame_idx % PROCESS_EVERY == 0:
             t0 = time.perf_counter()                 # ➜ 推理計時開始
-            boxes = fr.face_locations(rgb, model="cnn")  # CNN 模型偵測
+            #boxes = fr.face_locations(rgb, model="cnn")  # CNN 模型偵測
+            boxes = fr.face_locations(rgb, model="hog")
             face_vecs = fr.face_encodings(rgb, boxes)
             inference_ms = (time.perf_counter() - t0) * 1000  # 轉 ms
             labels = []

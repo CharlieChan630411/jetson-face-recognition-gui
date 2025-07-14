@@ -1,0 +1,17 @@
+--- src/retinaface_infer/face_detector_retina.py.bak	2025-07-09 15:40:12.700694622 +0800
++++ src/retinaface_infer/face_detector_retina.py	2025-07-09 15:41:21.322615296 +0800
+@@ -7,9 +7,13 @@
+ """
+ 
+ import cv2
+-from insightface.model_zoo import RetinaFace
+ import os, tempfile
+ 
++def get_detector():
++    return get_model("retinaface_mnet025_v2", root="~/.insightface")
++
++
++
+ # 1. 下載 / 載入官方 RetinaFace 模型
+ print("🚀 重新下载官方 RetinaFace mnet025 模型并测试")
+ 
